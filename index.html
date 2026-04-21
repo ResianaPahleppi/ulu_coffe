@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulu Coffe - Modern Order System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">☕ Ulu Coffe.</div>
+        <p class="nav-tagline">Premium Taste, Modern Vibe</p>
+    </nav>
+
+    <main class="container">
+        <section class="menu-section">
+            <h2 class="section-title">Pilih Menu Favoritmu</h2>
+            <div class="menu-grid" id="menu-container">
+            </div>
+        </section>
+
+        <aside class="checkout-section">
+            <div class="sticky-cart">
+                <h2 class="cart-title">🛒 Keranjang Belanja</h2>
+
+                <div id="cart-container" class="cart-items-wrapper">
+                    <div class="empty-state">
+                        <p>Belum ada pesanan.</p>
+                        <span>Silakan pilih menu di samping.</span>
+                    </div>
+                </div>
+
+                <div class="cart-total-box">
+                    <span>Total Pembayaran</span>
+                    <h3 id="cart-total">Rp 0</h3>
+                </div>
+
+                <form id="checkout-form" class="modern-form">
+                    <h3 class="form-title">Detail Pengiriman</h3>
+
+                    <div class="form-group">
+                        <input type="text" id="cust-name" required placeholder=" " autocomplete="off">
+                        <label>Nama Penerima</label>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="number" id="cust-phone" required placeholder=" " autocomplete="off">
+                        <label>Nomor HP (WhatsApp) Pembeli</label>
+                    </div>
+
+                    <div class="form-group">
+                        <select id="delivery-method" required>
+                            <option value="" disabled selected hidden></option>
+                            <option value="Dine In (Makan di Tempat)">Dine In (Makan di Tempat)</option>
+                            <option value="Take Away (Ambil Sendiri)">Take Away (Ambil Sendiri)</option>
+                            <option value="Delivery (Pesan Antar)">Delivery (Pesan Antar)</option>
+                        </select>
+                        <label>Metode Pengantaran</label>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="cust-address" required placeholder=" "></textarea>
+                        <label>Alamat Lengkap / No. Meja</label>
+                    </div>
+
+                    <div class="form-group">
+                        <select id="payment-method" required>
+                            <option value="" disabled selected hidden></option>
+                            <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+                            <option value="Transfer Bank">Transfer Bank</option>
+                            <option value="Cash (Tunai)">Cash (Tunai)</option>
+                        </select>
+                        <label>Metode Pembayaran</label>
+                    </div>
+
+                    <button type="submit" class="btn-checkout">Proses & Kirim ke WA</button>
+                </form>
+            </div>
+        </aside>
+    </main>
+
+    <div id="receipt-modal" class="modal-overlay">
+        <div class="modal-content">
+
+            <div id="receipt-printable" style="padding: 15px; background: white; border-radius: 8px; color: black;">
+                <div class="receipt-header">
+                    <h3>Struk Pembelian</h3>
+                    <h2>Ulu Coffe</h2>
+                </div>
+                <div class="receipt-body">
+                    <div class="r-row"><span>Nama:</span> <strong id="r-name"></strong></div>
+                    <div class="r-row"><span>No HP:</span> <strong id="r-phone"></strong></div>
+                    <div class="r-row"><span>Tipe:</span> <strong id="r-delivery"></strong></div>
+                    <div class="r-row"><span>Alamat/Meja:</span> <strong id="r-address"></strong></div>
+                    <div class="r-row"><span>Pembayaran:</span> <strong id="r-payment"></strong></div>
+
+                    <div class="divider"></div>
+                    <div id="r-items" class="receipt-items-list"></div>
+                    <div class="divider"></div>
+
+                    <div class="r-row total-row">
+                        <span>Total:</span> <strong id="r-total"></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="receipt-footer">
+                <p>Nota otomatis dikirim ke WA. Anda juga bisa mengunduhnya.</p>
+                <div class="action-buttons">
+                    <button class="btn-pdf" onclick="downloadPDF()">📄 Unduh PDF</button>
+                    <button class="btn-close" onclick="closeModal()">Tutup & Selesai</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
