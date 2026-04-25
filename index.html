@@ -13,11 +13,17 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">☕ Ulu Coffe.</div>
-        <p class="nav-tagline">Premium Taste, Modern Vibe</p>
+        <div>
+            <div class="nav-brand">☕ Ulu Coffe.</div>
+            <p class="nav-tagline">Premium Taste, Modern Vibe</p>
+        </div>
+        <div class="nav-tabs">
+            <button onclick="switchPage('order')" id="tab-order" class="tab-btn active">Kasir (Pesan)</button>
+            <button onclick="switchPage('history')" id="tab-history" class="tab-btn">Admin (Riwayat)</button>
+        </div>
     </nav>
 
-    <main class="container">
+    <main id="order-page" class="container">
         <section class="menu-section">
             <h2 class="section-title">Pilih Menu Favoritmu</h2>
             <div class="menu-grid" id="menu-container">
@@ -84,9 +90,30 @@
         </aside>
     </main>
 
+    <main id="history-page" class="container-history" style="display: none;">
+        <div class="history-card">
+            <h2 class="section-title">Riwayat & Status Pesanan</h2>
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu & Tanggal</th>
+                            <th>Nama Pelanggan</th>
+                            <th>Detail Pesanan</th>
+                            <th>Total</th>
+                            <th>Status Dapur</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
     <div id="receipt-modal" class="modal-overlay">
         <div class="modal-content">
-
             <div id="receipt-printable" style="padding: 15px; background: white; border-radius: 8px; color: black;">
                 <div class="receipt-header">
                     <h3>Struk Pembelian</h3>
@@ -116,7 +143,6 @@
                     <button class="btn-close" onclick="closeModal()">Tutup & Selesai</button>
                 </div>
             </div>
-
         </div>
     </div>
 

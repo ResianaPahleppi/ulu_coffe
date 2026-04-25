@@ -1,4 +1,4 @@
-// Database Menu Statis (Dengan Foto yang sudah diperbarui)
+// Database Menu
 const menus = [
     { id: 1, name: "Ice Kopsuren", price: 24000, image: "https://images.unsplash.com/photo-1559525839-b184a4d698c7?w=400&q=80" },
     { id: 2, name: "Ice Kopsushu", price: 24000, image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80" },
@@ -62,7 +62,7 @@ function renderCart() {
     cartTotal.innerText = formatRp(total);
 }
 
-// Tangani Form Submit (Tampilkan Struk & Kirim ke WhatsApp)
+// Tangani Form Submit (Simpan ke Riwayat & Kirim WA)
 document.getElementById('checkout-form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (cart.length === 0) { alert("Keranjang masih kosong! Silakan pilih menu terlebih dahulu."); return; }
@@ -85,16 +85,42 @@ document.getElementById('checkout-form').addEventListener('submit', function (e)
     rItems.innerHTML = '';
     let total = 0;
     let waItemsText = '';
+    let pesananTeksDB = ''; // Untuk disimpan di riwayat admin
 
     cart.forEach(item => {
         const subtotal = item.price * item.qty;
         total += subtotal;
         rItems.innerHTML += `<div class="r-row" style="margin-bottom: 4px;"><span>${item.qty}x ${item.name}</span><span>${formatRp(subtotal)}</span></div>`;
         waItemsText += `- ${item.qty}x ${item.name} (${formatRp(subtotal)})\n`;
+        pesananTeksDB += `${item.qty}x ${item.name}<br>`; // Format HTML untuk tabel
     });
 
     const finalTotal = formatRp(total);
     document.getElementById('r-total').innerText = finalTotal;
+
+    // ----- FITUR BARU: SIMPAN KE LOCALSTORAGE (DATABASE BROWSER) -----
+    const now = new Date();
+    const tanggal = now.toLocaleDateString('id-ID');
+    const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+    const pesananBaru = {
+        id: Date.now(),
+        waktu: `${tanggal} - ${jam}`,
+        nama: name,
+        meja: address,
+        pesanan: pesananTeksDB,
+        totalHarga: finalTotal,
+        status: 'Belum Dibuat' // Default status
+    };
+
+    // Ambil data lama, tambahkan yang baru, lalu simpan lagi
+    let riwayatPesanan = JSON.parse(localStorage.getItem('uluRiwayat')) || [];
+    riwayatPesanan.unshift(pesananBaru); // unshift agar pesanan terbaru ada di paling atas
+    localStorage.setItem('uluRiwayat', JSON.stringify(riwayatPesanan));
+    
+    // Perbarui tabel riwayat
+    renderHistory();
+    // ------------------------------------------------------------------
 
     // Tampilkan Modal
     document.getElementById('receipt-modal').style.display = 'flex';
@@ -113,26 +139,104 @@ function closeModal() {
     document.getElementById('checkout-form').reset();
 }
 
-// FUNGSI BARU: Download PDF Struk (Sudah Diperbaiki Anti-Blank)
+// Download PDF
 function downloadPDF() {
-    // Ambil elemen HTML yang ingin dijadikan PDF (Hanya area struk)
     const element = document.getElementById('receipt-printable');
-
-    // Opsi konfigurasi PDF
     const opt = {
-        margin: 0.5,
-        filename: 'Struk_Ulu_Coffe.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            scrollY: 0, // Kunci utama agar PDF tidak blank saat di-scroll
-            scrollX: 0,
-            backgroundColor: '#ffffff' // Pastikan background putih murni
-        },
+        margin: 0.5, filename: 'Struk_Ulu_Coffe.pdf', image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, backgroundColor: '#ffffff' },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
-
-    // Eksekusi pembuatan PDF
     html2pdf().set(opt).from(element).save();
 }
+
+// ==========================================
+// FITUR BARU: LOGIKA HALAMAN ADMIN (RIWAYAT)
+// ==========================================
+
+// Fungsi Beralih Halaman
+function switchPage(page) {
+    const orderPage = document.getElementById('order-page');
+    const historyPage = document.getElementById('history-page');
+    const tabOrder = document.getElementById('tab-order');
+    const tabHistory = document.getElementById('tab-history');
+
+    if (page === 'history') {
+        orderPage.style.display = 'none';
+        historyPage.style.display = 'block';
+        tabOrder.classList.remove('active');
+        tabHistory.classList.add('active');
+        renderHistory();
+    } else {
+        orderPage.style.display = 'grid'; // Kembalikan ke format CSS Grid
+        historyPage.style.display = 'none';
+        tabOrder.classList.add('active');
+        tabHistory.classList.remove('active');
+    }
+}
+
+// Render Tabel Riwayat
+function renderHistory() {
+    const tbody = document.getElementById('history-tbody');
+    let riwayatPesanan = JSON.parse(localStorage.getItem('uluRiwayat')) || [];
+    
+    tbody.innerHTML = '';
+
+    if (riwayatPesanan.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:gray;">Belum ada riwayat pesanan.</td></tr>`;
+        return;
+    }
+
+    riwayatPesanan.forEach(order => {
+        // Tentukan warna dan teks tombol status
+        const isBelum = order.status === 'Belum Dibuat';
+        const statusClass = isBelum ? 'status-belum' : 'status-sudah';
+        const btnText = isBelum ? '❌ Belum Dibuat' : '✅ Sudah Dibuat';
+
+        tbody.innerHTML += `
+            <tr>
+                <td><small>${order.waktu}</small></td>
+                <td><strong>${order.nama}</strong><br><small>${order.meja}</small></td>
+                <td><small>${order.pesanan}</small></td>
+                <td><strong>${order.totalHarga}</strong></td>
+                <td>
+                    <button class="status-badge ${statusClass}" onclick="toggleStatus(${order.id})">${btnText}</button>
+                </td>
+                <td>
+                    <button class="btn-hapus" onclick="hapusPesanan(${order.id})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Ubah Status Pesanan (Dapur)
+function toggleStatus(id) {
+    let riwayatPesanan = JSON.parse(localStorage.getItem('uluRiwayat')) || [];
+    let index = riwayatPesanan.findIndex(order => order.id === id);
+    
+    if (index !== -1) {
+        // Balikkan status
+        if (riwayatPesanan[index].status === 'Belum Dibuat') {
+            riwayatPesanan[index].status = 'Sudah Dibuat';
+        } else {
+            riwayatPesanan[index].status = 'Belum Dibuat';
+        }
+        // Simpan lagi dan update tampilan
+        localStorage.setItem('uluRiwayat', JSON.stringify(riwayatPesanan));
+        renderHistory();
+    }
+}
+
+// Hapus Pesanan (Opsional)
+function hapusPesanan(id) {
+    if (confirm("Yakin ingin menghapus riwayat ini?")) {
+        let riwayatPesanan = JSON.parse(localStorage.getItem('uluRiwayat')) || [];
+        riwayatPesanan = riwayatPesanan.filter(order => order.id !== id);
+        localStorage.setItem('uluRiwayat', JSON.stringify(riwayatPesanan));
+        renderHistory();
+    }
+}
+
+// Panggil renderHistory saat halaman pertama kali dimuat agar data siap
+window.onload = renderHistory;
